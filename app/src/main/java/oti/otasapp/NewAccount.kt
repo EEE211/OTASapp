@@ -1,9 +1,11 @@
 package oti.otasapp
 
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.support.annotation.RequiresApi
 import android.support.v7.app.AppCompatActivity
+import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
@@ -11,7 +13,8 @@ import android.widget.TextView
 
 class NewAccount : AppCompatActivity() {
 
-    private var task: ServerConnection? = null
+
+    //private var task: ServerConnection? = null
     private var textView: TextView? = null
     // wordを入れる
     private var editText: EditText? = null
@@ -28,6 +31,9 @@ class NewAccount : AppCompatActivity() {
         editText = findViewById(R.id.uriname)//プログラムで設定できるようにする
         editText2 = findViewById(R.id.uriname2)//プログラムで設定できるようにする
         editText3 = findViewById(R.id.uriname3)//プログラムで設定できるようにする
+        val qr_button = findViewById(R.id.qr) as Button
+
+        qr_button.setVisibility(View.INVISIBLE)
 
         val post = findViewById<Button>(R.id.post)//プログラムで設定できるようにする
 
@@ -42,19 +48,35 @@ class NewAccount : AppCompatActivity() {
             params[2] = params3
 
 
+            textView = findViewById(R.id.text_view)
 
             if (params[0]!!.length != 0 && params[1]!!.length != 0 && params[2]!!.length != 0) {//文字があるかないか
-                task = ServerConnection()
-                task!!.setListener(createListener())
-                task!!.execute("http://54.95.87.76/~morioka/TrueTest.php", *params)//実行
+                ServerConnection({
+                    if (it == null) {
+                        println("connection error")
+                        return@ServerConnection
+                    }
+                    textView!!.setText(it)
+
+
+                    qr_button.setVisibility(View.VISIBLE)
+
+                    //QR画面へ遷移
+                    qr_button.setOnClickListener {
+                        val intent = Intent(this, AcceptFragment::class.java)
+                        startActivity(intent)
+                    }
+                }).execute("http://54.95.87.76/~morioka/TrueTest.php", *params)
+                //task!!.setListener(createListener())
+                //task!!.execute("http://54.95.87.76/~morioka/TrueTest.php", *params)//実行
             }
         }
 
-        textView = findViewById(R.id.text_view)
+
     }
 
 
-    override fun onDestroy() {
+    /*override fun onDestroy() {
         task!!.setListener(null)
         super.onDestroy()
     }
@@ -66,4 +88,5 @@ class NewAccount : AppCompatActivity() {
             }
         }
     }
+   */
 }

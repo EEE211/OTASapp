@@ -13,7 +13,7 @@ import java.net.URL
 @RequiresApi(Build.VERSION_CODES.CUPCAKE)
 class ServerConnection(callback: (String?) -> Unit) : AsyncTask<String, Unit, String>()  {
 
-    private var listener: Listener? = null
+    //private var listener: Listener? = null
 
     var callback = callback
 
@@ -25,7 +25,6 @@ class ServerConnection(callback: (String?) -> Unit) : AsyncTask<String, Unit, St
         try {
             var url = URL(urlSt)
             httpConn = url.openConnection() as HttpURLConnection
-            //httpConn.requestMethod = "POST"
             httpConn.instanceFollowRedirects = false
             httpConn.requestMethod = "POST"
             httpConn.doOutput = true
@@ -36,15 +35,15 @@ class ServerConnection(callback: (String?) -> Unit) : AsyncTask<String, Unit, St
 
             var outStream: OutputStream? = null
 
-            if(params[1] != null){
+            if(params[0] == "http://54.95.87.76/~morioka/TrueTest.php"){
 
-                val user = params[1]
-                val pass = params[2]
-                val Email = params[3]
+                val user = "user=" + params[1]
+                val pass = "pass=" + params[2]
+                val Email = "Email=" + params[3]
 
                 try{
                     outStream = httpConn.outputStream
-                    outStream!!.write(user.toByteArray())
+                    outStream.write(user.toByteArray())
                     outStream.write(pass.toByteArray())
                     outStream.write(Email.toByteArray())
                     outStream.flush()
@@ -58,9 +57,7 @@ class ServerConnection(callback: (String?) -> Unit) : AsyncTask<String, Unit, St
             val status = httpConn.responseCode
 
             //通信成功ならデータ取得
-            if (status == HttpURLConnection.HTTP_OK && params[1] == null) {
-
-
+            if (status == HttpURLConnection.HTTP_OK && params[0] != "http://54.95.87.76/~morioka/TrueTest.php") {
 
                 val br = BufferedReader(InputStreamReader(httpConn.inputStream))
 
@@ -78,6 +75,7 @@ class ServerConnection(callback: (String?) -> Unit) : AsyncTask<String, Unit, St
 
             }else if(status == HttpURLConnection.HTTP_OK && params[1] != null){
                 responseData = "登録完了"
+                return responseData
             } else {
                 println("ERROR ${status}")
             }
@@ -94,19 +92,19 @@ class ServerConnection(callback: (String?) -> Unit) : AsyncTask<String, Unit, St
     override fun onPostExecute(result: String) {
         super.onPostExecute(result)
 
-        if(listener != null){
+        /*if(listener != null){
             listener!!.onSuccess(result)
-        }else {
+        }else {*/
             callback(result)
-        }
+        //}
 
     }
 
-    internal fun setListener(listener: Listener?){
+    /*internal fun setListener(listener: Listener?){
         this.listener = listener
     }
 
     internal interface Listener{
         fun onSuccess(result: String)
-    }
+    }*/
 }
